@@ -5,7 +5,7 @@
 
 #define PROGRAM_NAME "cpmake"
 #define EXIT exit(0)
-const int ERRCODE = -1;
+#define ERRCODE -1
 
 enum class Errcodes {
     INVALID_FILE_EXTENSION,
@@ -20,19 +20,26 @@ public:
     std::string output_file;
     std::string compile_cmd;
 
-    std::vector<std::string> extensions = { ".cpp", ".c", ".cc", ".rs" };
-    std::vector<std::string> compilers =  { "clang++", "clang", "clang++", "rustc" };
+    std::vector<std::string> extensions = {".cpp", ".c", ".cc", ".rs"};
+    std::vector<std::string> compilers =  {"clang++", "clang", "clang++", "rustc"};
 
-    size_t exten_vec_size = extensions.size();
+    size_t vector_size = extensions.size();
+    int vector_pos = isvalid_file();
+    
     int isvalid_file()
     {
-        for (int i = 0; i < exten_vec_size; i++) {
-            if ( (input_file.find(extensions[i]) ) != std::string::npos) {
-                return i;
-            }
+        std::string extension;
+        int dot_pos = input_file.find_last_of(".");
+
+        if (dot_pos != std::string::npos) {
+            extension = input_file.substr(dot_pos);
         }
 
-        return ERRCODE;
+        for (int i = 0; i < vector_size; i++) {
+            if (extension == extensions[i]) return i;
+        }
+
+        return 0;
     }
 
     void printerr_messages(Errcodes errcode)
@@ -43,9 +50,30 @@ public:
         }
     }
 
-    std::string compile_command(int vector_pos)
+    std::string erase_dot(std::string str)
     {
+        int dot_pos = str.find_last_of('.');
+        str.erase(dot_pos-1);
+
+        return str;
+    }
+
+    void set_output_file()
+    {
+        if (compilers[vector_pos] == "rustc") {
+            output_file = "";
+            return;
+        }
+
+        output_file = erase_dot(input_file);
+        output_file += ".exe";
+    }
+
+    std::string compile_command()
+    {
+        set_output_file();
         def_compiler = compilers[vector_pos];
+
         if (def_compiler == "rustc") {
             compile_cmd = def_compiler;
             compile_cmd += " ";
@@ -56,7 +84,7 @@ public:
             compile_cmd = def_compiler;
             compile_cmd += " ";
             compile_cmd += input_file;
-            compile_cmd += " ";
+            compile_cmd += " -o ";
             compile_cmd += output_file;
         }
 
@@ -65,15 +93,18 @@ public:
 
     void compile()
     {
-        int vector_pos = isvalid_file();
         
         if (vector_pos == ERRCODE) {
             printerr_messages(Errcodes::INVALID_FILE_EXTENSION);
         }
 
-        std::string cmd = compile_command(vector_pos);
+        std::string cmd = compile_command();
+
         std::cout << "________________compiling_________________" << std::endl;
+
+        std::cout << cmd << std::endl;
         std::system(cmd.c_str());
+
         std::cout << "________________compiling_________________" << std::endl;
     }
 
