@@ -24,23 +24,25 @@ public:
     std::vector<std::string> compilers =  {"clang++", "clang", "clang++", "rustc"};
 
     size_t vector_size = extensions.size();
-    int vector_pos = isvalid_file();
     
-    int isvalid_file()
+    size_t isvalid_file()
     {
         std::string extension;
-        int dot_pos = input_file.find_last_of(".");
+        size_t dot_pos = input_file.find_last_of(".");
 
         if (dot_pos != std::string::npos) {
             extension = input_file.substr(dot_pos);
         }
 
-        for (int i = 0; i < vector_size; i++) {
-            if (extension == extensions[i]) return i;
+        for (size_t i = 0; i < vector_size; i++) {
+            if (extension == extensions[i]) {
+                return i;
+            }
         }
 
-        return 0;
+        return std::string::npos;
     }
+
 
     void printerr_messages(Errcodes errcode)
     {
@@ -52,13 +54,13 @@ public:
 
     std::string erase_dot(std::string str)
     {
-        int dot_pos = str.find_last_of('.');
-        str.erase(dot_pos-1);
+        size_t dot_pos = str.find_last_of('.');
+        str.erase(dot_pos);
 
         return str;
     }
 
-    void set_output_file()
+    void set_output_file(size_t vector_pos)
     {
         if (compilers[vector_pos] == "rustc") {
             output_file = "";
@@ -69,9 +71,11 @@ public:
         output_file += ".exe";
     }
 
-    std::string compile_command()
+    std::string compile_command(size_t vector_pos)
     {
-        set_output_file();
+
+
+        set_output_file(vector_pos);
         def_compiler = compilers[vector_pos];
 
         if (def_compiler == "rustc") {
@@ -93,19 +97,20 @@ public:
 
     void compile()
     {
-        
-        if (vector_pos == ERRCODE) {
+        size_t vector_pos = isvalid_file();
+
+        if (vector_pos == std::string::npos) {
             printerr_messages(Errcodes::INVALID_FILE_EXTENSION);
         }
 
-        std::string cmd = compile_command();
+        std::string cmd = compile_command(vector_pos);
 
-        std::cout << "________________compiling_________________" << std::endl;
+        std::cout << "_____________________________________________" << "\n\n";
 
-        std::cout << cmd << std::endl;
+        std::cout << "    " << cmd << std::endl;
         std::system(cmd.c_str());
 
-        std::cout << "________________compiling_________________" << std::endl;
+        std::cout  << "_____________________________________________" << '\n';
     }
 
     void print_usage()
