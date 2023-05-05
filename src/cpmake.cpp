@@ -6,21 +6,22 @@
 
 #define PROGRAM_NAME "cpmake"
 #define EXIT exit(0)
-#define ERRCODE -1
 
-#define SUCCESS_CODE 7
+#define ERRCODE -1
 
 enum class Errcodes {
     INVALID_FILE_EXTENSION,
     INVALID_FLAG,
     FILE_DOESNT_EXIST,
+    OCODE,
 };
 
+typedef enum class Errcodes Errcodes;
 Errcodes errcodes;
 
 class Cpmake {
 public:
-    std::string def_compiler;
+    std::string compiler;
     std::string input_file;
     std::string output_file;
     std::string compile_cmd;
@@ -29,25 +30,27 @@ public:
     std::vector<std::string> compilers =  {"clang++", "clang", "clang++", "rustc"};
     std::vector<std::string> flags = {"-o"};
 
-    size_t vector_size = extensions.size();
-    size_t vector_pos;
+    bool output_file_choosed;
+
+    int vector_size = extensions.size();
+    int vector_pos;
     
-    size_t isvalid_file(std::string input_file)
+    int isvalid_file(std::string input_file)
     {
         std::string extension;
-        size_t dot_pos = input_file.find_last_of(".");
+        int dot_pos = input_file.find_last_of(".");
 
         if (dot_pos != std::string::npos) {
             extension = input_file.substr(dot_pos);
         }
 
-        for (size_t i = 0; i < vector_size; i++) {
+        for (int i = 0; i < vector_size; i++) {
             if (extension == extensions[i]) {
                 return i;
             }
         }
 
-        return std::string::npos;
+        return ERRCODE;
     }
 
 
@@ -66,41 +69,44 @@ public:
 
     std::string erase_dot(std::string str)
     {
-        size_t dot_pos = str.find_last_of('.');
+        int dot_pos = str.find_last_of('.');
         str.erase(dot_pos);
 
         return str;
     }
 
-    void set_output_file(std::string out_file = "")
+    void set_output_file(std::string out_file = "null")
     {
         if (compilers[vector_pos] == "rustc") {
             output_file = "";
-            return;
         }
 
-        if (out_file == "") {
-            output_file = erase_dot(input_file);
-            output_file += ".exe";
+        if (out_file == "null" || out_file == "" || out_file == " ") {
+            std::string temp_out_file = erase_dot(input_file);
+            temp_out_file += ".exe";
+            output_file = temp_out_file;
         } else {
-            output_file = out_file;
+            int ret_value = out_file.find(".exe");
+            if (ret_value == std::string::npos) {
+                out_file =+ ".exe";
+                output_file = out_file;
+            }
         }
+
     }
 
-    std::string compile_command()
+    std::string get_compile_cmd()
     {
+        compiler = compilers[vector_pos];
 
-
-        def_compiler = compilers[vector_pos];
-
-        if (def_compiler == "rustc") {
-            compile_cmd = def_compiler;
+        if (compiler == "rustc") {
+            compile_cmd = compiler;
             compile_cmd += " ";
             compile_cmd += input_file;
         }
 
         else {
-            compile_cmd = def_compiler;
+            compile_cmd = compiler;
             compile_cmd += " ";
             compile_cmd += input_file;
             compile_cmd += " -o ";
@@ -112,7 +118,7 @@ public:
 
     void compile()
     {
-        std::string cmd = compile_command();
+        std::string cmd = get_compile_cmd();
         std::cout << "_____________________________________________" << "\n\n";
 
         std::cout << "    " << cmd << std::endl;
@@ -127,7 +133,7 @@ public:
         EXIT;
     }
 
-    int try_file_types(std::string file_name)
+    void try_file_types(std::string file_name)
     {
         for (int i = 0; i < vector_size; i++) {
             std::string temp_file = file_name;
@@ -136,25 +142,20 @@ public:
             std::filesystem::path file_path("./" + temp_file);
             if  (std::filesystem::exists(file_path)) {
                 input_file = temp_file;
-                return SUCCESS_CODE;
-            } else printerr_messages(Errcodes::FILE_DOESNT_EXIST);
+                return;
+            }
         }
 
-        return ERRCODE;
+        printerr_messages(Errcodes::FILE_DOESNT_EXIST);
     }
 
-    int does_file_exists(std::string file_name)
+    void does_file_exists(std::string file_name)
     {
        std::filesystem::path file_path(file_name);
 
        if (std::filesystem::exists(file_path)) {
             input_file = file_name;
-            return SUCCESS_CODE;
-        } else {
-            printerr_messages(Errcodes::FILE_DOESNT_EXIST);
         }
-
-        return ERRCODE;
     }
 
     int binary_search(std::vector<std::string>& vec, std::string key)
@@ -173,53 +174,65 @@ public:
         return ERRCODE;
     }
 
-    void flag_O(int curr_flag_pos, std::vector<std::string>& flags)
+    void manager(std::string str, std::vector<std::string>& args)
     {
-        std::string temp_output_file = flags[curr_flag_pos+1];
-        if (temp_output_file == "") {
-            set_output_file(temp_output_file);
-        }
-        else if ( (temp_output_file.find(".exe")) == std::string::npos) {
-            temp_output_file += ".exe";
-            output_file = temp_output_file;
-        }
+        if ( (isvalid_file(str)) != ERRCODE ) does_file_exists(str); 
+        else try_file_types(str);
 
     }
 
-    void valid_flags(std::string flag, std::vector<std::string>& flags)
+    void set_vector_pos()
     {
-        int O = binary_search(flags, "-o");
-        if (O != ERRCODE) flag_O(O, flags);
-        else printerr_messages(Errcodes::INVALID_FLAG);
-    }
-
-    int manager(std::string str, std::vector<std::string>& args)
-    {
-        int ret_value {};
-
-        if ( (str.find('-')) != std::string::npos) valid_flags(str, args);
-        else if ( (isvalid_file(str)) != ERRCODE ) { 
-            ret_value = does_file_exists(str); 
+        vector_pos = 0;
+        for (int i = 0; i < vector_size; i++) {
+            if ((input_file.find(extensions[i])) != std::string::npos) {
+                vector_pos = i;
+            }
         }
-        else {
-            ret_value = try_file_types(str);
-        }
-
-        return SUCCESS_CODE;
     }
 
     void set_input_file(int argc, char* argv[])
     {
         std::vector<std::string> args(argv, argc + argv);
-        std::string temp_input_file = "_";
-
-        int ret_value {};
+        input_file = "_";
 
         for (int i = 1; i < argc; i++) {
-            ret_value = manager(args[i], args);
-            if (ret_value == SUCCESS_CODE) vector_pos = i-1;  // i-1 as loop is from 1
+            manager(args[i], args);
+            if (input_file != "_") return;
         }
 
+        set_vector_pos();
+    }
+
+    void do_things(std::vector<std::string>& strs, size_t t, size_t pos) {
+        print_everything();
+        if (flags[t] == "-o") {
+            set_output_file(strs[pos+1]);
+            output_file_choosed = true;
+        }
+    }
+
+    void check_flags(const int argc, char* argvals[])
+    {
+        std::vector<std::string> args(argvals, argvals + argc);
+        const size_t len = flags.size();
+
+        for (size_t i = 0; i < argc; i++) {
+            for (size_t j = 0; j < len; j++) {
+                if (args[i] == flags[j]) do_things(args, j, i);
+            }
+        }
+    }
+
+    void print_everything()
+    {
+        std::cout << input_file << std::endl;
+        std::cout << output_file << std::endl;
+        std::cout << compiler << std::endl;
+        std::cout << compile_cmd << std::endl;
+
+        std::cout << vector_size << std::endl;
+        std::cout << vector_pos << std::endl;
     }
 };
 
@@ -228,16 +241,9 @@ int main(int argc, char* argv[])
     Cpmake cpmake;
     if (argc < 2) cpmake.print_usage();
     cpmake.set_input_file(argc, argv);
+    cpmake.check_flags(argc, argv);
+    if (!cpmake.output_file_choosed) cpmake.set_output_file();
     cpmake.compile();
 
-    std::cout << cpmake.vector_pos << std::endl;
-    std::cout << cpmake.input_file << std::endl;
-    std::cout << cpmake.output_file << std::endl;
-    std::cout << cpmake.def_compiler << std::endl;
-    std::cout << cpmake.compile_cmd << std::endl;
+    return 0;
 }
-
-
-/* Features (Options):
- 1. -o flag eg cpmake file.cpp -o file. output_file = file + ".exe" :/
- */
