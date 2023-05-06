@@ -30,10 +30,11 @@ public:
     std::vector<std::string> compilers =  {"clang++", "clang", "clang++", "rustc"};
     std::vector<std::string> flags = {"-o"};
 
-    bool output_file_choosed;
+    bool defined_output_file;
 
     int vector_size = extensions.size();
-    int vector_pos;
+    int flags_size = flags.size();
+    int vector_pos {};
     
     int isvalid_file(std::string input_file)
     {
@@ -75,7 +76,7 @@ public:
         return str;
     }
 
-    void set_output_file(std::string out_file = "null")
+    void set_output_file(std::string out_file = "null")  // out_file = examp
     {
         if (compilers[vector_pos] == "rustc") {
             output_file = "";
@@ -88,7 +89,7 @@ public:
         } else {
             int ret_value = out_file.find(".exe");
             if (ret_value == std::string::npos) {
-                out_file =+ ".exe";
+                out_file += ".exe";
                 output_file = out_file;
             }
         }
@@ -133,61 +134,44 @@ public:
         EXIT;
     }
 
-    void try_file_types(std::string file_name)
+    void try_file_types(std::string curr_arg)
     {
         for (int i = 0; i < vector_size; i++) {
-            std::string temp_file = file_name;
-            temp_file += extensions[i];
+            std::string temp_arg = curr_arg;
+            temp_arg += extensions[i];
 
-            std::filesystem::path file_path("./" + temp_file);
+            std::filesystem::path file_path(temp_arg);
             if  (std::filesystem::exists(file_path)) {
-                input_file = temp_file;
+                input_file = temp_arg;
                 return;
             }
         }
 
-        printerr_messages(Errcodes::FILE_DOESNT_EXIST);
+        return;
     }
 
-    void does_file_exists(std::string file_name)
+    void does_file_exists(std::string str)
     {
-       std::filesystem::path file_path(file_name);
-
+       std::filesystem::path file_path("./" + str);
        if (std::filesystem::exists(file_path)) {
-            input_file = file_name;
-        }
-    }
-
-    int binary_search(std::vector<std::string>& vec, std::string key)
-    {
-        int s = 0;
-        int e = vec.size()-1;
-
-        while (s <= e) {
-            int mid = (s+e)/2;
-
-            if (vec[mid] == key) return mid;
-            else if (vec[mid] > key) e = mid-1;
-            else s = mid+1;
+            input_file = str;
         }
 
-        return ERRCODE;
     }
 
-    void manager(std::string str, std::vector<std::string>& args)
+    void manager(std::string curr_arg)
     {
-        if ( (isvalid_file(str)) != ERRCODE ) does_file_exists(str); 
-        else try_file_types(str);
+        if ( (isvalid_file(curr_arg)) != ERRCODE ) does_file_exists(curr_arg); 
+        else try_file_types(curr_arg);
 
     }
 
     void set_vector_pos()
     {
-        vector_pos = 0;
         for (int i = 0; i < vector_size; i++) {
             if ((input_file.find(extensions[i])) != std::string::npos) {
                 vector_pos = i;
-            }
+            } else continue;
         }
     }
 
@@ -195,31 +179,30 @@ public:
     {
         std::vector<std::string> args(argv, argc + argv);
         input_file = "_";
+        args.push_back(" ");
 
         for (int i = 1; i < argc; i++) {
-            manager(args[i], args);
-            if (input_file != "_") return;
+            manager(args[i]);
+            if (input_file != "_") break;
         }
 
         set_vector_pos();
     }
 
-    void do_things(std::vector<std::string>& strs, size_t t, size_t pos) {
-        print_everything();
-        if (flags[t] == "-o") {
-            set_output_file(strs[pos+1]);
-            output_file_choosed = true;
+    void do_things(std::string arg, std::string next_arg) {
+        if (arg == "-o") {
+            set_output_file(next_arg);
+            defined_output_file = true;
         }
     }
 
     void check_flags(const int argc, char* argvals[])
     {
         std::vector<std::string> args(argvals, argvals + argc);
-        const size_t len = flags.size();
 
         for (size_t i = 0; i < argc; i++) {
-            for (size_t j = 0; j < len; j++) {
-                if (args[i] == flags[j]) do_things(args, j, i);
+            for (size_t j = 0; j < flags_size; j++) {
+                if (args[i] == flags[j]) do_things(args[i], args[i+1]);
             }
         }
     }
@@ -242,8 +225,10 @@ int main(int argc, char* argv[])
     if (argc < 2) cpmake.print_usage();
     cpmake.set_input_file(argc, argv);
     cpmake.check_flags(argc, argv);
-    if (!cpmake.output_file_choosed) cpmake.set_output_file();
+    if (!cpmake.defined_output_file) cpmake.set_output_file();
     cpmake.compile();
+    
+    cpmake.print_everything();
 
     return 0;
 }
