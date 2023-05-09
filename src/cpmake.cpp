@@ -3,13 +3,8 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <fileio.h>
 
-#define PROGRAM_NAME "cpmake"
-#define EXIT exit(0)
-
-#define DEF_STRING_VAL "NULL"
-
-#define ERRCODE -1
 
 enum class Errcodes {
     INVALID_FILE_EXTENSION,
@@ -23,7 +18,7 @@ typedef enum class Errcodes Errcodes;
 Errcodes errcodes;
 
 class Cpmake {
-public:
+private:
     std::string compiler;
     std::string input_file = DEF_STRING_VAL;
     std::string output_file;
@@ -39,6 +34,8 @@ public:
     int vector_size = extensions.size();
     int flags_size = flags.size();
     int vector_pos {};
+
+public:
     
     int isvalid_file(std::string input_file)
     {
@@ -62,16 +59,16 @@ public:
     void printerr_messages(Errcodes errcode)
     {
         if (errcode == Errcodes::INVALID_FILE_EXTENSION) {
-            std::cout << "error: invalid file extension" << std::endl;
+            std::cerr << "error: invalid file extension" << std::endl;
             EXIT;
         } else if (errcode == Errcodes::INPUT_FILE_NOT_PROVIDED) {
-            std::cout << "error: program excepts an input file" << std::endl;
+            std::cerr << "error: program excepts an input file" << std::endl;
             EXIT;
         } else if (errcode == Errcodes::INVALID_FLAG) {
-            std::cout << "error: invalid flag" << std::endl;
+            std::cerr << "error: invalid flag" << std::endl;
             EXIT;
         } else if (errcode == Errcodes::_H_DOESNT_EXPECT_ANY_ARGUMENTS) {
-            std::cout << "Note: '-h' flag doesn't expect any arguments" << std::endl;
+            std::cerr << "Note: '-h' flag doesn't expect any arguments" << std::endl;
             return;
         }
     }
@@ -288,6 +285,12 @@ public:
         if (input_file == DEF_STRING_VAL) 
             printerr_messages(Errcodes::INPUT_FILE_NOT_PROVIDED);
     }
+
+    void isdefined()
+    {
+        if (!defined_vector_pos) set_vector_pos();
+        if (!defined_output_file) set_output_file();
+    }
 };
 
 int main(int argc, char* argv[])
@@ -301,13 +304,16 @@ int main(int argc, char* argv[])
     args.push_back(" ");
 
     Cpmake cpmake;
-    if (argc < 2) cpmake.print_usage();
+    if (argc < 2) {
+        freadline("sample.txt");
+        std::cout << std::endl;
+        cpmake.print_usage();
+    }
 
     cpmake.set_input_file(argc, args);
     cpmake.check_flags(argc, args);
 
-    if (!cpmake.defined_vector_pos) cpmake.set_vector_pos();
-    if (!cpmake.defined_output_file) cpmake.set_output_file();
+    cpmake.isdefined();
     cpmake.compile();
 
     return 0;
