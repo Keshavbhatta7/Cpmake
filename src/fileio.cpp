@@ -1,4 +1,17 @@
-#include <fileio.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "fileio.h"
+
+std::string getcflgas(std::string curr_line_content)
+{
+    /*
+     * Take curr_line_content: cflags=/cflags = "-Wall" 
+     * Extract the -Wall and return; 
+     */
+
+    return "_";
+}
 
 int freadline(std::string fname)
 {
@@ -7,7 +20,8 @@ int freadline(std::string fname)
 
     if (!inf.is_open()) return ERRCODE;
     while (std::getline(inf, line_content)) {
-        line_content += "\n";
         std::cout << line_content << std::endl;
     }
+
+    return true;
 }

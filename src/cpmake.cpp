@@ -3,14 +3,26 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
-#include <fileio.h>
+#include <windows.h>
+#include "fileio.h"
+
+/* What is vector_pos variabe?
+* It is the most important variable in this whole code
+* After checking the file extension of the input_file
+* We set vector_pos to the postition extension of the input_file in vector
+* [extensions] and as the position of compilers in [compilers] vector
+* is set relative to the extensions in [extensions] vector it
+* also tells the compiler needed to compile current file and a lot other.
+* So, It is very very important.
+*/
 
 
 enum class Errcodes {
     INVALID_FILE_EXTENSION,
     INVALID_FLAG,
     INPUT_FILE_NOT_PROVIDED,
-    _H_DOESNT_EXPECT_ANY_ARGUMENTS,
+    FLAG_DOESNT_EXPECT_ARGS,
+    FLAG_EXPECTS_ARGS,
     OCODE,
 };
 
@@ -19,23 +31,38 @@ Errcodes errcodes;
 
 class Cpmake {
 private:
-    std::string compiler;
+    std::string compiler = DEF_STRING_VAL;
     std::string input_file = DEF_STRING_VAL;
-    std::string output_file;
+    std::string output_file = DEF_STRING_VAL;
     std::string compile_cmd = DEF_STRING_VAL;
 
     std::vector<std::string> extensions = {".cpp", ".c", ".cc", ".rs"};
     std::vector<std::string> compilers =  {"clang++", "clang", "clang++", "rustc"};
-    std::vector<std::string> flags = {"-o", "-h", "-m"};
+    std::vector<std::string> flags = {"-o", "-h", "-m", "-r"};
 
     bool defined_output_file;
     bool defined_vector_pos;
+    bool run_afterwards;
 
     int vector_size = extensions.size();
     int flags_size = flags.size();
     int vector_pos {};
 
 public:
+
+    int print_smth(size_t times, char ch, bool newline = false, size_t newline_times = 1)
+    {
+        for (int i = 1; i <= times; i++) {
+            std::cout << ch;
+        }
+
+        if (newline) {
+            for (int i = 1; i <= newline_times; i++) {
+                std::cout << '\n';
+            }
+        }
+        return EXIT_SUCCESS;
+    }
     
     int isvalid_file(std::string input_file)
     {
@@ -67,9 +94,11 @@ public:
         } else if (errcode == Errcodes::INVALID_FLAG) {
             std::cerr << "error: invalid flag" << std::endl;
             EXIT;
-        } else if (errcode == Errcodes::_H_DOESNT_EXPECT_ANY_ARGUMENTS) {
-            std::cerr << "Note: '-h' flag doesn't expect any arguments" << std::endl;
+        } else if (errcode == Errcodes::FLAG_DOESNT_EXPECT_ARGS) {
+            std::cerr << "warning: provided flag doesn't expect any arguments" << std::endl;
             return;
+        } else if (errcode == Errcodes::FLAG_EXPECTS_ARGS) {
+            std::cerr << "warning: provided flags expects more argument";
         }
     }
 
@@ -129,15 +158,20 @@ public:
         }
     }
 
-    void compile()
+    int compile()
     {
         if (compile_cmd == DEF_STRING_VAL) set_compile_cmd();
-        std::cout << "_____________________________________________" << "\n\n";
+        int len = compile_cmd.size();
 
-        std::cout << "    " << compile_cmd << std::endl;
+
+        print_smth(len+DEF_SPACES, '_', true, 2);
+        print_smth(DEF_SPACES/2, ' ');
+
+        std::cout << compile_cmd << std::endl;
         std::system(compile_cmd.c_str());
 
-        std::cout  << "_____________________________________________" << '\n';
+        print_smth(len+DEF_SPACES, '_', true);
+        return EXIT_SUCCESS;
     }
 
     void print_usage()
@@ -196,9 +230,16 @@ public:
     void manager(std::vector<std::string>& strs, size_t curr_pos)
     {
         if (strs[curr_pos] == " " || strs[curr_pos] == "") return;
-        for (int i = 0; i < flags_size; i++) {
+        /* for (int i = 0; i < flags_size; i++) {
             if (strs[curr_pos] == flags[i] || strs[curr_pos-1] == flags[i])
             return;
+        } */
+
+        for (int i = 0; i < flags_size; i++) {
+            if (strs[curr_pos] == flags[i]) return;
+            else if (curr_pos > 0) {
+                if  (strs[curr_pos-1] == "-o") return;
+            }
         }
 
         if ( (isvalid_file(strs[curr_pos]) ) != ERRCODE )
@@ -242,16 +283,16 @@ public:
 
         if (strs[curr_pos] == "-o") {
 
-            // Check if input file is provided or not.
-            check_input_file();
+            // check_input_file();
             int ret_val = set_vector_pos();
-            defined_vector_pos = true;
             if (ret_val == ERRCODE) check_input_file();
 
+            defined_vector_pos = true;
             set_output_file(strs[curr_pos+1]);
+
             defined_output_file = true;
         } else if (strs[curr_pos] == "-h") {
-            check_args_after_flags(strs, curr_pos, strs_len, Errcodes::_H_DOESNT_EXPECT_ANY_ARGUMENTS);
+            check_args_after_flags(strs, curr_pos, strs_len, Errcodes::FLAG_DOESNT_EXPECT_ARGS);
             print_usage();
             EXIT;
         } else if (strs[curr_pos] == "-m") {
@@ -259,6 +300,12 @@ public:
             set_vector_pos();
             set_output_file();
             set_compile_cmd(strs[curr_pos+1]);
+        } else if (strs[curr_pos] == "-r") {
+            run_afterwards = true;
+            size_t size = strs.size();
+            if (curr_pos == size && input_file == DEF_STRING_VAL) {
+                printerr_messages(Errcodes::FLAG_EXPECTS_ARGS);
+            }
         }
     }
 
@@ -288,8 +335,35 @@ public:
 
     void isdefined()
     {
+        check_input_file();
         if (!defined_vector_pos) set_vector_pos();
         if (!defined_output_file) set_output_file();
+    }
+
+    int get_term_cols()
+    {
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(hConsole, &csbi);
+
+        return csbi.srWindow.Right - csbi.srWindow.Left+1;
+    }
+
+    int run_out()
+    {
+        if (run_afterwards) {
+            check_input_file();
+            int spaces = get_term_cols();
+            std::cout <<  "running " << output_file << std::endl;
+
+            system(output_file.c_str());
+            std::cout << std::endl;
+
+            return EXIT_SUCCESS;
+        }
+
+        return EXIT_FAILURE;
     }
 };
 
@@ -305,8 +379,8 @@ int main(int argc, char* argv[])
 
     Cpmake cpmake;
     if (argc < 2) {
-        freadline("sample.txt");
-        std::cout << std::endl;
+        /* freadline("sample.txt");
+        std::cout << std::endl; */
         cpmake.print_usage();
     }
 
@@ -315,6 +389,7 @@ int main(int argc, char* argv[])
 
     cpmake.isdefined();
     cpmake.compile();
+    cpmake.run_out();
 
     return 0;
 }
