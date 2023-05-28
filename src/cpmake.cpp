@@ -5,6 +5,7 @@
 #include <vector>
 #include <windows.h>
 #include "fileio.h"
+#include "cpmake.h"
 
 /* What is vector_pos variabe?
 * It is the most important variable in this whole code
@@ -35,14 +36,16 @@ private:
     std::string input_file = DEF_STRING_VAL;
     std::string output_file = DEF_STRING_VAL;
     std::string compile_cmd = DEF_STRING_VAL;
+    std::string delcmd = DEF_STRING_VAL;
 
     std::vector<std::string> extensions = {".cpp", ".c", ".cc", ".rs"};
     std::vector<std::string> compilers =  {"clang++", "clang", "clang++", "rustc"};
-    std::vector<std::string> flags = {"-o", "-h", "-m", "-r"};
+    std::vector<std::string> flags = {"-o", "-h", "-m", "-r", "-k"};
 
     bool defined_output_file;
     bool defined_vector_pos;
-    bool run_afterwards;
+    bool run_output_file;
+    bool delete_output_file;
 
     int vector_size = extensions.size();
     int flags_size = flags.size();
@@ -168,6 +171,10 @@ public:
         print_smth(DEF_SPACES/2, ' ');
 
         std::cout << compile_cmd << std::endl;
+
+        print_smth(DEF_SPACES/2, ' ');
+        if (delete_output_file) std::cout << delcmd << std::endl;
+
         std::system(compile_cmd.c_str());
 
         print_smth(len+DEF_SPACES, '_', true);
@@ -230,7 +237,7 @@ public:
     void manager(std::vector<std::string>& strs, size_t curr_pos)
     {
         if (strs[curr_pos] == " " || strs[curr_pos] == "") return;
-        /* for (int i = 0; i < flags_size; i++) {
+        /* fjj
             if (strs[curr_pos] == flags[i] || strs[curr_pos-1] == flags[i])
             return;
         } */
@@ -301,11 +308,13 @@ public:
             set_output_file();
             set_compile_cmd(strs[curr_pos+1]);
         } else if (strs[curr_pos] == "-r") {
-            run_afterwards = true;
+            run_output_file = true;
             size_t size = strs.size();
             if (curr_pos == size && input_file == DEF_STRING_VAL) {
                 printerr_messages(Errcodes::FLAG_EXPECTS_ARGS);
             }
+        } else if (strs[curr_pos] == "-k") {
+            delete_output_file = true;
         }
     }
 
@@ -350,9 +359,28 @@ public:
         return csbi.srWindow.Right - csbi.srWindow.Left+1;
     }
 
+    void set_delcmd()
+    {
+        delcmd = "del ";
+        delcmd += output_file;
+    }
+
+    void delete_out_file()
+    {
+
+        if (delete_output_file && input_file != DEF_STRING_VAL && output_file != DEF_STRING_VAL)
+            system(delcmd.c_str());
+    }
+
+    void call_funcs()
+    {
+        run_out();
+        delete_out_file();
+    }
+
     int run_out()
     {
-        if (run_afterwards) {
+        if (run_output_file) {
             check_input_file();
             int spaces = get_term_cols();
             std::cout <<  "running " << output_file << std::endl;
@@ -388,8 +416,10 @@ int main(int argc, char* argv[])
     cpmake.check_flags(argc, args);
 
     cpmake.isdefined();
+    cpmake.set_delcmd();
+
     cpmake.compile();
-    cpmake.run_out();
+    cpmake.call_funcs();
 
     return 0;
 }

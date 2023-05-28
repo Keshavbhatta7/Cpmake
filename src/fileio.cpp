@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "fileio.h"
+#include "cpmake.h"
 
 std::string getcflgas(std::string curr_line_content)
 {
