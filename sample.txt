@@ -1,3 +1,0 @@
-cflags = "-Wall -O3"
-files = "fileio.cpp"
-all = "clang++ main.cpp -o main.exe"

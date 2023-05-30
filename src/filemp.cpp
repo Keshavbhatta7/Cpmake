@@ -13,6 +13,7 @@ constants consts;
 
 void FileMp::setDefVals()
 {
+    consts.compiler = DEF_STRING_VAL;
     consts.compiler_flags = DEF_STRING_VAL;
     consts.input_files = DEF_STRING_VAL;
     consts.output_file = DEF_STRING_VAL;
@@ -20,6 +21,7 @@ void FileMp::setDefVals()
 
 void FileMp::printVals(constants& consts)
 {
+    std::cout << consts.compiler << std::endl;
     std::cout << consts.compiler_flags << std::endl;
     std::cout << consts.input_files << std::endl;
     std::cout << consts.output_file << std::endl;
@@ -61,6 +63,27 @@ bool FileMp::checkSyntax(std::vector<std::string>& synxs, std::string txt)
     return false;
 }
 
+int FileMp::getEnd(size_t quote1, size_t quote2) { return quote2 - quote1 - 1; }
+
+
+int FileMp::getCompiler(std::string line_txt)
+{
+    std::vector<std::string> syntx = {"(C)=", "(C) =", "cpl=", "cpl ="};
+    bool compiler = checkSyntax(syntx, line_txt);
+
+    if (compiler)
+    {
+        size_t quote1 = line_txt.find_first_of('"');
+        size_t quote2 = line_txt.find_last_of('"');
+
+        if (quote1 != std::string::npos && quote2 != std::string::npos)
+        {
+            consts.compiler = line_txt.substr(quote1+1, getEnd(quote1, quote2));
+        } else printErs(Errcodes::INVALID_SYNTAX);
+    }
+
+    return EXIT_SUCCESS;
+}
 
 int FileMp::getCflags(std::string line_txt)
 {
@@ -70,12 +93,12 @@ int FileMp::getCflags(std::string line_txt)
 
     if (flags)
     {
-        size_t quote1 = line_txt.find_first_of("'");
-        size_t quote2 = line_txt.find_last_of("'");
+        size_t quote1 = line_txt.find_first_of('"');
+        size_t quote2 = line_txt.find_last_of('"');
 
         if (quote1 != std::string::npos && quote2 != std::string::npos)
         {
-            consts.compiler_flags = line_txt.substr(quote1+1, quote2 - quote1 - 1);
+            consts.compiler_flags = line_txt.substr(quote1+1, getEnd(quote1, quote2));
         } else 
         {
             printErs(Errcodes::INVALID_SYNTAX);
@@ -85,8 +108,41 @@ int FileMp::getCflags(std::string line_txt)
     return EXIT_SUCCESS;
 }
 
-int FileMp::getFname(std::string line_txt)
+int FileMp::getFileNames(std::string line_txt)
 {
+    std::vector<std::string> syntxs = {"(IF)=", "(IF) =", "(IFNS)=", "(IFNS) ="};
+    bool fname = checkSyntax(syntxs, line_txt);
+
+    if (fname)
+    {
+        size_t quote1 = line_txt.find_first_of('"');
+        size_t quote2 = line_txt.find_last_of('"');
+
+        if (quote1 != std::string::npos && quote2 != std::string::npos)
+        {
+            consts.input_files = line_txt.substr(quote1+1, getEnd(quote1, quote2));
+        } else printErs(Errcodes::INVALID_SYNTAX);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int FileMp::getOutName(std::string line_txt)
+{
+    std::vector<std::string> syntxs = {"(OF)=", "(OF) ="};
+    bool outputFile = checkSyntax(syntxs, line_txt);
+
+    if (outputFile)
+    {
+        size_t quote1 = line_txt.find_first_of('"');
+        size_t quote2 = line_txt.find_last_of('"');
+
+        if (quote1 != std::string::npos && quote2 != std::string::npos)
+        {
+            consts.output_file = line_txt.substr(quote1+1, getEnd(quote1, quote2));
+        } else printErs(Errcodes::INVALID_SYNTAX);
+    }
+
     return EXIT_SUCCESS;
 }
 
@@ -99,6 +155,9 @@ int FileMp::fReadLine(std::string fname)
     if (!inf.is_open()) return ERRCODE;
     while (std::getline(inf, line_content)) {
         if (consts.compiler_flags == DEF_STRING_VAL) getCflags(line_content);
+        if (consts.compiler == DEF_STRING_VAL) getCompiler(line_content);
+        if (consts.input_files == DEF_STRING_VAL) getFileNames(line_content);
+        if (consts.output_file == DEF_STRING_VAL) getOutName(line_content);
     }
 
     return true;
