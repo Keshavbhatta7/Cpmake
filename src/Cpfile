@@ -1,0 +1,1 @@
+cflags = '-Wall -03 --std=c++17'

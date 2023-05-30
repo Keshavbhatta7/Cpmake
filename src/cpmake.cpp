@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 #include <windows.h>
-#include "fileio.h"
+
+#include "filemp.h"
 #include "cpmake.h"
 
 /* What is vector_pos variabe?
@@ -16,16 +17,6 @@
 * also tells the compiler needed to compile current file and a lot other.
 * So, It is very very important.
 */
-
-
-enum class Errcodes {
-    INVALID_FILE_EXTENSION,
-    INVALID_FLAG,
-    INPUT_FILE_NOT_PROVIDED,
-    FLAG_DOESNT_EXPECT_ARGS,
-    FLAG_EXPECTS_ARGS,
-    OCODE,
-};
 
 typedef enum class Errcodes Errcodes;
 Errcodes errcodes;
@@ -402,13 +393,12 @@ int main(int argc, char* argv[])
         args.push_back(argv[i]);
     }
 
-    // Is important for functins that run til args.size()+1;
+    // Is important for functins that run loop til args.size()+1;
     args.push_back(" ");
 
     Cpmake cpmake;
     if (argc < 2) {
-        /* freadline("sample.txt");
-        std::cout << std::endl; */
+        filemp_init(MAKEFILE_NAME);
         cpmake.print_usage();
     }
 
