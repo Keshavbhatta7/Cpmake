@@ -397,8 +397,11 @@ int main(int argc, char* argv[])
     args.push_back(" ");
 
     Cpmake cpmake;
+    FileMp filemp;
+
     if (argc < 2) {
-        filemp_init(MAKEFILE_NAME);
+        constants macros = filemp.fileMpInit(MAKEFILE_NAME);
+        filemp.printVals(macros);
         cpmake.print_usage();
     }
 

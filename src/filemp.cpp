@@ -2,20 +2,30 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+
 #include "cpmake.h"
 #include "filemp.h"
 
 typedef enum class Errcodes Errcodes;
+
+
 constants consts;
 
-void setvals()
+void FileMp::setDefVals()
 {
     consts.compiler_flags = DEF_STRING_VAL;
     consts.input_files = DEF_STRING_VAL;
     consts.output_file = DEF_STRING_VAL;
 }
 
-void printers(Errcodes errcode)
+void FileMp::printVals(constants& consts)
+{
+    std::cout << consts.compiler_flags << std::endl;
+    std::cout << consts.input_files << std::endl;
+    std::cout << consts.output_file << std::endl;
+}
+
+void FileMp::printErs(Errcodes errcode)
 {
     switch (errcode)
     {
@@ -30,27 +40,35 @@ void printers(Errcodes errcode)
     }
 }
 
-constants filemp_init(std::string filename)
+constants FileMp::fileMpInit(std::string filename)
 {
-    setvals();
+    setDefVals();
     if (filename != MAKEFILE_NAME)
     {
-        printers(Errcodes::INVALID_FILE_NAME);
+        printErs(Errcodes::INVALID_FILE_NAME);
     }
 
-   if ( !(std::filesystem::exists(filename)) ) printers(Errcodes::FILE_DOESNT_EXIST);
-   freadline(filename);
+   if ( !(std::filesystem::exists(filename)) ) printErs(Errcodes::FILE_DOESNT_EXIST);
+   fReadLine(filename);
    return consts;
 }
 
+bool FileMp::checkSyntax(std::vector<std::string>& synxs, std::string txt)
+{
+    for (const auto& syn : synxs) {
+        if (txt.find(syn) != std::string::npos) return true;
+    }
+    return false;
+}
 
-std::string getcflags(std::string line_txt)
+
+int FileMp::getCflags(std::string line_txt)
 {
 
-    size_t syn = line_txt.find("cflags=");
-    size_t syn2 = line_txt.find("cflags =");
+    std::vector<std::string> synx = {"cflags=", "cflags =", "(CF)=", "(CF) ="};
+    bool flags = checkSyntax(synx, line_txt);
 
-    if (syn != std::string::npos || syn2 != std::string::npos)
+    if (flags)
     {
         size_t quote1 = line_txt.find_first_of("'");
         size_t quote2 = line_txt.find_last_of("'");
@@ -60,15 +78,19 @@ std::string getcflags(std::string line_txt)
             consts.compiler_flags = line_txt.substr(quote1+1, quote2 - quote1 - 1);
         } else 
         {
-            printers(Errcodes::INVALID_SYNTAX);
-            return DEF_STRING_VAL;
+            printErs(Errcodes::INVALID_SYNTAX);
         }
     }
 
-    return DEF_STRING_VAL;
+    return EXIT_SUCCESS;
 }
 
-int freadline(std::string fname)
+int FileMp::getFname(std::string line_txt)
+{
+    return EXIT_SUCCESS;
+}
+
+int FileMp::fReadLine(std::string fname)
 {
 
     std::ifstream inf { fname.c_str() };
@@ -76,7 +98,7 @@ int freadline(std::string fname)
 
     if (!inf.is_open()) return ERRCODE;
     while (std::getline(inf, line_content)) {
-        if (consts.compiler_flags == DEF_STRING_VAL) getcflags(line_content);
+        if (consts.compiler_flags == DEF_STRING_VAL) getCflags(line_content);
     }
 
     return true;

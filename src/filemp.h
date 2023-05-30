@@ -1,6 +1,8 @@
 #include <iostream>
+#include <vector>
 #include <fstream>
 #include <string>
+
 #include "cpmake.h"
 
 #ifndef FILEMP_H
@@ -12,15 +14,19 @@ typedef struct {
     std::string output_file;
 } constants;
 
+class FileMp {
+public:
+    constants fileMpInit(std::string filename);
 
-void setvals();
-void printers(Errcodes errcode);
-int freadline(std::string fname);
+    void setDefVals();
+    void printVals(constants& consts);
+    void printErs(Errcodes errcode);
 
-constants filemp_init(std::string filename);
-std::string getcflags(std::string line_txt);
-std::string getfiles(std::string line_txt);
+    int fReadLine(std::string fname);
+    int getCflags(std::string line_txt);
+    int getFname(std::string line_txt);
 
-
+    bool checkSyntax(std::vector<std::string>& syns, std::string txt);
+};
 
 #endif
