@@ -1,9 +1,9 @@
 #include <filesystem>
 #include <iostream>
 #include <cstdlib>
+#include <stdlib.h>
 #include <string>
 #include <vector>
-#include <windows.h>
 
 #include "filemp.h"
 #include "cpmake.h"
@@ -31,12 +31,12 @@ private:
 
     std::vector<std::string> extensions = {".cpp", ".c", ".cc", ".rs"};
     std::vector<std::string> compilers =  {"clang++", "clang", "clang++", "rustc"};
-    std::vector<std::string> flags = {"-o", "-h", "-m", "-r", "-k"};
+    std::vector<std::string> flags = {"-o", "-h", "-m", "-r", "-k", "-ff"};
 
-    bool defined_output_file;
-    bool defined_vector_pos;
-    bool run_output_file;
-    bool delete_output_file;
+    bool defined_output_file = false;
+    bool defined_vector_pos = false;
+    bool run_output_file = false;
+    bool delete_output_file = false;
 
     int vector_size = extensions.size();
     int flags_size = flags.size();
@@ -126,7 +126,7 @@ public:
 
     void set_compile_cmd(std::string extra = DEF_STRING_VAL)
     {
-        compiler = compilers[vector_pos];
+        if (compiler == DEF_STRING_VAL) compiler = compilers[vector_pos];
 
         if (compiler == "rustc") {
             compile_cmd = compiler;
@@ -140,16 +140,16 @@ public:
 
         else {
             compile_cmd = compiler;
-            compile_cmd += " ";
+            if (extra != DEF_STRING_VAL) {
+                compile_cmd += " ";
+                compile_cmd += extra;
+            }
+
             compile_cmd += " -o ";
             compile_cmd += output_file;
             compile_cmd += " ";
             compile_cmd += input_file;
 
-            if (extra != DEF_STRING_VAL) {
-                compile_cmd += " ";
-                compile_cmd += extra;
-            }
         }
     }
 
@@ -176,7 +176,7 @@ public:
     void print_usage()
     {
         std::cout << "Usage: " << PROGRAM_NAME << 
-        " [input_file] [-o  (output_file)]" <<
+        " [input_file] [-o (output_file)]" <<
         " [-m (compiler_flags)]" << std::endl;
         EXIT;
     }
@@ -375,15 +375,26 @@ public:
         return EXIT_FAILURE;
     }
 
-    int sethings(constants consts)
+    int setThings(constants& consts)
     {
         input_file = consts.input_files;
         set_output_file(consts.output_file);
         compiler = consts.compiler;
         set_compile_cmd(consts.compiler_flags);
+        return EXIT_SUCCESS;
+    }
+    
+    int fileThing()
+    {
+        FileMp filemp;
+        constants consts = filemp.fileMpInit(MAKEFILE_NAME);
+        filemp.checkConsts(consts);
+        setThings(consts);
+        compile();
 
         return EXIT_SUCCESS;
     }
+
 };
 
 int main(int argc, char* argv[])
@@ -397,14 +408,9 @@ int main(int argc, char* argv[])
     args.push_back(" ");
 
     Cpmake cpmake;
-    FileMp filemp;
 
     if (argc < 2) {
-        constants macros = filemp.fileMpInit(MAKEFILE_NAME);
-        filemp.checkConsts(macros);
-        cpmake.sethings(macros);
-        cpmake.print_everything();
-        cpmake.compile();
+        cpmake.fileThing();
         cpmake.print_usage();
     }
 

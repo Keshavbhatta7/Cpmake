@@ -1,4 +1,3 @@
-(CF) = "--std=c++17"
-(C) = "clang++"
-(OF) = "cpmake.exe"
-(IF) = "cpmake.cpp filemp.cpp"
+(C) = "rustc"
+(OF) = "main"
+(IF) = "rust.rs"
