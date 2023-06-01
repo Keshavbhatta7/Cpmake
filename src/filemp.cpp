@@ -39,6 +39,15 @@ void FileMp::printErs(Errcodes errcode)
 
         case Errcodes::FILE_DOESNT_EXIST: std::cerr << "error: file doesn't exist" << std::endl;
         EXIT;
+
+        case Errcodes::INPUT_FILE_NOT_PROVIDED: std::cerr << "error: input file isn't provided" << std::endl;
+        EXIT;
+
+        case Errcodes::COMPILER_NOT_PROVIDED: std::cerr << "error: compiler is not defined in 'Cpfile'" << std::endl;
+        EXIT;
+
+        case Errcodes::OUTPUT_FILE_NOT_PROVIDED: std::cerr << "error: output file isn't provided" << std::endl;
+        EXIT;
     }
 }
 
@@ -144,6 +153,15 @@ int FileMp::getOutName(std::string line_txt)
     }
 
     return EXIT_SUCCESS;
+}
+
+bool FileMp::checkConsts(constants& consts)
+{
+    if (consts.input_files == DEF_STRING_VAL) printErs(Errcodes::INPUT_FILE_NOT_PROVIDED);
+    if (consts.output_file == DEF_STRING_VAL) printErs(Errcodes::OUTPUT_FILE_NOT_PROVIDED);
+    if (consts.compiler == DEF_STRING_VAL) printErs(Errcodes::COMPILER_NOT_PROVIDED);
+
+    return true;
 }
 
 int FileMp::fReadLine(std::string fname)

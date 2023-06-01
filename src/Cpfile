@@ -1,4 +1,4 @@
-(CF) = "-Wall -O3 --std=c++17"
+(CF) = "--std=c++17"
 (C) = "clang++"
 (OF) = "cpmake.exe"
 (IF) = "cpmake.cpp filemp.cpp"

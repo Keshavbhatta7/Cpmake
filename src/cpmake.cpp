@@ -104,13 +104,13 @@ public:
         return str;
     }
 
-    void set_output_file(std::string out_file = "null")
+    void set_output_file(std::string out_file = DEF_STRING_VAL)
     {
         if (compilers[vector_pos] == "rustc") {
             output_file = "";
         }
 
-        if (out_file == "null" || out_file == "" || out_file == " ") {
+        if (out_file == DEF_STRING_VAL || out_file == "" || out_file == " ") {
             std::string temp_out_file = erase_dot(input_file);
             temp_out_file += ".exe";
             output_file = temp_out_file;
@@ -119,7 +119,7 @@ public:
             if (ret_value == std::string::npos) {
                 out_file += ".exe";
                 output_file = out_file;
-            }
+            } else output_file = out_file;
         }
 
     }
@@ -141,9 +141,10 @@ public:
         else {
             compile_cmd = compiler;
             compile_cmd += " ";
-            compile_cmd += input_file;
             compile_cmd += " -o ";
             compile_cmd += output_file;
+            compile_cmd += " ";
+            compile_cmd += input_file;
 
             if (extra != DEF_STRING_VAL) {
                 compile_cmd += " ";
@@ -340,16 +341,6 @@ public:
         if (!defined_output_file) set_output_file();
     }
 
-    int get_term_cols()
-    {
-        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        GetConsoleScreenBufferInfo(hConsole, &csbi);
-
-        return csbi.srWindow.Right - csbi.srWindow.Left+1;
-    }
-
     void set_delcmd()
     {
         delcmd = "del ";
@@ -373,7 +364,6 @@ public:
     {
         if (run_output_file) {
             check_input_file();
-            int spaces = get_term_cols();
             std::cout <<  "running " << output_file << std::endl;
 
             system(output_file.c_str());
@@ -383,6 +373,16 @@ public:
         }
 
         return EXIT_FAILURE;
+    }
+
+    int sethings(constants consts)
+    {
+        input_file = consts.input_files;
+        set_output_file(consts.output_file);
+        compiler = consts.compiler;
+        set_compile_cmd(consts.compiler_flags);
+
+        return EXIT_SUCCESS;
     }
 };
 
@@ -401,7 +401,10 @@ int main(int argc, char* argv[])
 
     if (argc < 2) {
         constants macros = filemp.fileMpInit(MAKEFILE_NAME);
-        filemp.printVals(macros);
+        filemp.checkConsts(macros);
+        cpmake.sethings(macros);
+        cpmake.print_everything();
+        cpmake.compile();
         cpmake.print_usage();
     }
 

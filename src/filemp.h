@@ -31,6 +31,7 @@ public:
     int getEnd(size_t quote1, size_t quote2);
 
     bool checkSyntax(std::vector<std::string>& syns, std::string txt);
+    bool checkConsts(constants& consts);
 };
 
 #endif
