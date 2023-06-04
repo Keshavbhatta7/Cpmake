@@ -1,3 +1,6 @@
+#ifndef FILEMP_H
+#define FILEMP_H
+
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -5,14 +8,12 @@
 
 #include "cpmake.h"
 
-#ifndef FILEMP_H
-    #define FILEMP_H
 
 typedef struct {
     std::string compiler;
-    std::string compiler_flags;
-    std::string input_files;
-    std::string output_file;
+    std::string compilerFlags;
+    std::string inputFiles;
+    std::string outputFile;
 } constants;
 
 class FileMp {
@@ -21,16 +22,15 @@ public:
 
     void setDefVals();
     void printVals(constants& consts);
-    void printErs(Errcodes errcode);
 
     int fReadLine(std::string fname);
-    int getCflags(std::string line_txt);
-    int getFileNames(std::string line_txt);
-    int getOutName(std::string line_txt);
-    int getCompiler(std::string line_txt);
+    int getCflags(std::string str);
+    int getFileNames(std::string str);
+    int getOutName(std::string str);
+    int getCompiler(std::string str);
     int getEnd(size_t quote1, size_t quote2);
 
-    bool checkSyntax(std::vector<std::string>& syns, std::string txt);
+    bool checkSyntax(std::vector<std::string>& syns, std::string str);
     bool checkConsts(constants& consts);
 };
 

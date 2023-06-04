@@ -1,3 +1,4 @@
-(C) = "rustc"
-(OF) = "main"
-(IF) = "rust.rs"
+(CPP_C) = "clang++"
+(CFS) = "--std=c++17 -O3 -Wall"
+(IFS) = "filemp.cpp cpmake.cpp errhandle.cpp"
+(OF) = "cpmake.exe"
