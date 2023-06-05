@@ -52,7 +52,7 @@ public:
     size_t vectorPos = DEF_INT_VAL;
 
 public:
-    int print(size_t times, char ch, bool nline = false, size_t nlineTimes = 1);
+    int print(size_t times, char ch, bool nline, size_t nlineTimes);
     int isValidFile(std::string file);
     int fileStuff();
 
@@ -64,7 +64,7 @@ public:
 
     bool fileExists(std::string fname);
 
-    void setOutputFile(std::string outFile = DEF_STRING_VAL);
+    void setOutputFile(std::string outFile);
     void setInputFile(const size_t argc, std::vector<std::string>& args);
     void tryFileTypes(std::string fname);
     void manageChecks(std::vector<std::string>& args, size_t pos);

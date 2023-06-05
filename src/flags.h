@@ -6,10 +6,10 @@
 #include "errhandle.h"
 #include "cpmake.h"
 
-class Flags {
+class Main : public Cpmake {
 public:
-    void checkFlags(const int argc, std::vector<std::string>& args, Cpmake& cpmake);
-    void processFlags(std::vector<std::string>& args, size_t currPos, Cpmake& cpmake);
+    void checkFlags(const int argc, std::vector<std::string>& args);
+    void processFlags(std::vector<std::string>& args, size_t currPos);
 };
 
 #endif

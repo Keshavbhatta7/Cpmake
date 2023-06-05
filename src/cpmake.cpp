@@ -294,27 +294,23 @@ int main(int argc, char* argv[])
         args.push_back(argv[i]);
     }
 
-    // Is important for functins that run loop til args.size()+1;
     args.push_back(" ");
-
-    Cpmake cpmake;
-    Flags flags;
+    Main main;
 
     if (argc < 2) {
-        cpmake.fileStuff();
-        cpmake.printUsage();
+        main.fileStuff();
+        main.printUsage();
     }
 
-    cpmake.setInputFile(argc, args);
+    main.setInputFile(argc, args);
 
-    // flags.cpp stuff
-    flags.checkFlags(argc, args, cpmake);
+    main.checkFlags(argc, args);
 
-    cpmake.areDefined();
-    cpmake.setDelCmd();
+    main.areDefined();
+    main.setDelCmd();
 
-    cpmake.compile();
-    cpmake.callFuncs();
+    main.compile();
+    main.callFuncs();
 
     return 0;
 }

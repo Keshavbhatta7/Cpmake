@@ -8,7 +8,6 @@
 
 #include "cpmake.h"
 
-
 typedef struct {
     std::string compiler;
     std::string compilerFlags;
