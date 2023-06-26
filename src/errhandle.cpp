@@ -7,9 +7,6 @@ void printErrs(Errcodes errcode)
 {
     switch (errcode)
     {
-        case Errcodes::INVALID_FILE_NAME: std::cerr << "error: file name should be 'Cpfile'" << std::endl;
-        EXIT;
-
         case Errcodes::INVALID_SYNTAX: std::cerr << "error: invalid syntax" << std::endl;
         EXIT;
 

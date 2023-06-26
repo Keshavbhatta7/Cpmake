@@ -1,0 +1,4 @@
+(IFS) = "cpmake.cpp errhandle.cpp flags.cpp filemp.cpp"
+(OF) = "cpmake.exe"
+(CPP_C) = "clang++"
+(CFS) = "--std=c++17 -O3"

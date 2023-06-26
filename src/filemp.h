@@ -6,14 +6,14 @@
 #include <fstream>
 #include <string>
 
-#include "cpmake.h"
-
-typedef struct {
+struct constants {
     std::string compiler;
     std::string compilerFlags;
     std::string inputFiles;
     std::string outputFile;
-} constants;
+};
+
+typedef struct constants constants;
 
 class FileMp {
 public:

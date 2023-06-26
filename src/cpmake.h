@@ -4,15 +4,15 @@
 #include <iostream>
 #include "filemp.h"
 
-#define EXIT exit(ERRCODE)
-
 const std::string PROGRAM_NAME = "cpmake";
 const std::string DEF_STRING_VAL = "NULL";
-const std::string MAKEFILE_NAME = "Cpfile";
+const std::string DEF_BUILDFILE_NAME = "build.cpk";
 
 const int ERRCODE = -1;
 const int DEF_SPACES = 10;
 const int DEF_INT_VAL = -235;
+
+#define EXIT exit(ERRCODE)
 
 enum class Errcodes {
     INVALID_FILE_EXTENSION,
@@ -21,13 +21,10 @@ enum class Errcodes {
     FLAG_DOESNT_EXPECT_ARGS,
     FLAG_EXPECTS_ARGS,
     INVALID_SYNTAX,
-    INVALID_FILE_NAME,
     FILE_DOESNT_EXIST,
     OUTPUT_FILE_NOT_PROVIDED,
     COMPILER_NOT_PROVIDED,
 };
-
-typedef enum class Errcodes Errcodes;
 
 class Cpmake {
 public:
@@ -37,10 +34,11 @@ public:
     std::string compileCmd = DEF_STRING_VAL;
     std::string delcmd = DEF_STRING_VAL;
     std::string compilerFlags = DEF_STRING_VAL;
+    std::string buildFileName = DEF_BUILDFILE_NAME;
 
-    std::vector<std::string> extensions = {".cpp", ".c", ".cc", ".rs"};
+    std::vector<std::string> extensions = {".cpp", ".c", ".cc"};
     std::vector<std::string> compilers =  {"clang++", "clang", "clang++"};
-    std::vector<std::string> flags = {"-o", "-h", "-m", "-r", "-k"};
+    std::vector<std::string> flags = {"-o", "-h", "-m", "-r", "-k", "-c", "-f"};
 
     bool definedOutputFile = false;
     bool definedVectorPos = false;
@@ -52,9 +50,10 @@ public:
     size_t vectorPos = DEF_INT_VAL;
 
 public:
+
     int print(size_t times, char ch, bool nline, size_t nlineTimes);
     int isValidFile(std::string file);
-    int fileStuff();
+    void fileStuff();
 
     int setVectorPos();
     int compile();

@@ -27,10 +27,7 @@ void FileMp::printVals(constants& consts)
 
 constants FileMp::fileMpInit(std::string filename)
 {
-    setDefVals();
-    if (filename != MAKEFILE_NAME)
-        printErrs(Errcodes::INVALID_FILE_NAME);
-
+   setDefVals();
    if ( !(std::filesystem::exists(filename)) ) printErrs(Errcodes::FILE_DOESNT_EXIST);
    fReadLine(filename);
    return consts;
