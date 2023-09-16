@@ -14,11 +14,12 @@ public:
 
     bool isItFlag(std::vector<std::string>& args, const size_t pos);
     void flagO(std::vector<std::string>& args, const size_t pos);
-    void flagH(std::vector<std::string>& args, const size_t pos, const size_t argsLen);
     void flagM(std::vector<std::string>& args, const size_t pos);
     void flagR(std::vector<std::string>& args, const size_t pos);
     void flagC(std::vector<std::string>& args, const size_t pos, const size_t argsLen);
     void flagF(std::vector<std::string>& args, const size_t pos);
+    void flagH(std::vector<std::string>& args, const size_t pos, const size_t argsLen);
+    void flagHF(std::vector<std::string>& args, const size_t pos);
 
     std::string translateFlags(std::string flag);
 };

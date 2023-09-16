@@ -69,6 +69,7 @@ void Main::processFlags(std::vector<std::string>& args, const size_t pos)
     else if (args[pos] == "-c") flagC(args, pos, argsLen);
     else if (args[pos] == "-k") deleteOutputFile = true;
     else if (args[pos] == "-f") flagF(args, pos);
+    else if (args[pos] == "-hf" || args[pos] == "-h file") flagHF(args, pos);
     
 }
 
@@ -92,7 +93,7 @@ std::string Main::translateFlags(std::string flag)
     return DEF_STRING_VAL;
 }
 
-bool Main::isItFlag(std::vector<std::string>& args, const  size_t pos)
+bool Main::isItFlag(std::vector<std::string>& args, const size_t pos)
 {
     std::string temp = translateFlags(args[pos]);
 
@@ -112,4 +113,11 @@ bool Main::isItFlag(std::vector<std::string>& args, const  size_t pos)
     }
 
     return false;
+}
+
+void Main::flagHF(std::vector<std::string>& args, const size_t pos)
+{
+    std::cout << "Flag f:" << std::endl;
+    std::cout << "You can create a file 'build.cpk' and write some code in following syntax." << std::endl;
+    std::cout << "EXAMPLE: " << std::endl;
 }

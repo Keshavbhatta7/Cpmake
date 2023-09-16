@@ -66,7 +66,7 @@ void Cpmake::setOutputFile(std::string outFile = DEF_STRING_VAL)
     } else {
         int _ = outFile.find(".exe");
         if (_ == std::string::npos) {
-            outFile+= ".exe";
+            outFile += ".exe";
             outputFile = outFile;
         } else 
             outputFile = outFile;
