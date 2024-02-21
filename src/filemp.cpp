@@ -1,3 +1,5 @@
+// FileManipulation.Cpp
+
 #include <iostream>
 #include <filesystem>
 #include <fstream>
@@ -28,6 +30,7 @@ void FileMp::printVals(constants& consts)
 constants FileMp::fileMpInit(std::string filename)
 {
    setDefVals();
+   // Will print error if the file doesn't exit
    if ( !(std::filesystem::exists(filename)) ) printErrs(Errcodes::FILE_DOESNT_EXIST);
    fReadLine(filename);
    return consts;
@@ -49,14 +52,19 @@ int FileMp::getCompiler(std::string str)
 
     if (compiler)
     {
-        size_t quote1 = str.find_first_of('"');
-        size_t quote2 = str.find_last_of('"');
+        size_t doubleQuote1 = str.find_first_of('"');
+        size_t doubleQuote2 = str.find_last_of('"');
 
-        if (quote1 != std::string::npos && quote2 != std::string::npos)
+        size_t quote1 = str.find_first_of("'");
+        size_t quote2 = str.find_last_of("'");
+
+        if (doubleQuote1 != std::string::npos && doubleQuote2 != std::string::npos)
         {
+            consts.compiler = str.substr(doubleQuote1+1, getEnd(doubleQuote1, doubleQuote2));
+        } else if (quote1 != std::string::npos && quote2 != std::string::npos) {
             consts.compiler = str.substr(quote1+1, getEnd(quote1, quote2));
         } else printErrs(Errcodes::INVALID_SYNTAX);
-    }
+     }
 
     return EXIT_SUCCESS;
 }
@@ -69,13 +77,18 @@ int FileMp::getCflags(std::string str)
 
     if (flags)
     {
-        size_t quote1 = str.find_first_of('"');
-        size_t quote2 = str.find_last_of('"');
+        size_t doubleQuote1 = str.find_first_of('"');
+        size_t doubleQuote2 = str.find_last_of('"');
 
-        if (quote1 != std::string::npos && quote2 != std::string::npos)
+        size_t quote1 = str.find_first_of("'");
+        size_t quote2 = str.find_last_of("'");
+
+        if (doubleQuote1 != std::string::npos && doubleQuote2 != std::string::npos)
+        {
+            consts.compilerFlags = str.substr(doubleQuote1+1, getEnd(doubleQuote1, doubleQuote2));
+        } else if (quote1 != std::string::npos && quote2 != std::string::npos) {
             consts.compilerFlags = str.substr(quote1+1, getEnd(quote1, quote2));
-        else 
-            printErrs(Errcodes::INVALID_SYNTAX);
+        } else printErrs(Errcodes::INVALID_SYNTAX);
     }
 
     return EXIT_SUCCESS;
@@ -88,12 +101,18 @@ int FileMp::getFileNames(std::string str)
 
     if (fname)
     {
-        size_t quote1 = str.find_first_of('"');
-        size_t quote2 = str.find_last_of('"');
+        size_t doubleQuote1 = str.find_first_of('"');
+        size_t doubleQuote2 = str.find_last_of('"');
 
-        if (quote1 != std::string::npos && quote2 != std::string::npos)
+        size_t quote1 = str.find_first_of("'");
+        size_t quote2 = str.find_last_of("'");
+
+        if (doubleQuote1 != std::string::npos && doubleQuote2 != std::string::npos)
+        {
+            consts.inputFiles = str.substr(doubleQuote1+1, getEnd(doubleQuote1, doubleQuote2));
+        } else if (quote1 != std::string::npos && quote2 != std::string::npos) {
             consts.inputFiles = str.substr(quote1+1, getEnd(quote1, quote2));
-        else printErrs(Errcodes::INVALID_SYNTAX);
+        } else printErrs(Errcodes::INVALID_SYNTAX);
     }
 
     return EXIT_SUCCESS;
@@ -106,11 +125,16 @@ int FileMp::getOutName(std::string str)
 
     if (outputFile)
     {
-        size_t quote1 = str.find_first_of('"');
-        size_t quote2 = str.find_last_of('"');
+        size_t doubleQuote1 = str.find_first_of('"');
+        size_t doubleQuote2 = str.find_last_of('"');
 
-        if (quote1 != std::string::npos && quote2 != std::string::npos)
+        size_t quote1 = str.find_first_of("'");
+        size_t quote2 = str.find_last_of("'");
+
+        if (doubleQuote1 != std::string::npos && doubleQuote2 != std::string::npos)
         {
+            consts.outputFile = str.substr(doubleQuote1+1, getEnd(doubleQuote1, doubleQuote2));
+        } else if (quote1 != std::string::npos && quote2 != std::string::npos) {
             consts.outputFile = str.substr(quote1+1, getEnd(quote1, quote2));
         } else printErrs(Errcodes::INVALID_SYNTAX);
     }
