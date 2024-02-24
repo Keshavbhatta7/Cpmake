@@ -1,2 +1,2 @@
 # Cpmake
-A cli program for compiling file of various programming languages.
+A cli program made for using compilers efficiently and easily
