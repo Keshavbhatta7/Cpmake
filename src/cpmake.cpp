@@ -116,7 +116,7 @@ void Cpmake::printUsage()
 {
    std::cout << "Usage: " << PROGRAM_NAME << " <Args>\n";
    std::cout << "Options:\n";
-   std::cout << "[]: Will check for '" << buildFileName << "'" " file with certain syntax to compile a project/file, if not found will print usage" << std::endl;
+   std::cout << "[NONE]: Will check for '" << buildFileName << "'" " file with certain syntax to compile a project/file, if not found will print usage" << std::endl;
    std::cout << "[file name]: Will check it's file type if it's cpp/c/cc then it will compile" << std::endl;
    std::cout << "[-o Ouput File]: lets you choose output file name" << std::endl;
    std::cout << "[-m Compilers flags]: lets you add some extra flags for the compiler" << std::endl;
@@ -124,7 +124,7 @@ void Cpmake::printUsage()
    std::cout << "[-r Run]: runs the output file (if compiled)" << std::endl;
    std::cout << "[-k kill/delete]: delete's output file after compiled" << std::endl;
    std::cout << "[-f File]: If instead of using default file name '" << buildFileName << "', you want to use something else, you can use -f flag " << std::endl;
-   std::cout << "[-c Compiler]: lets you choose other compilers than clang and clang++" << std::endl;
+   std::cout << "[-c Compiler]: lets you choose compilers other than clang and clang++" << std::endl;
    EXIT;
 }
 
