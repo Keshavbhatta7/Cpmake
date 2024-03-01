@@ -115,9 +115,10 @@ bool Main::isItFlag(std::vector<std::string>& args, const size_t pos)
     return false;
 }
 
-void Main::flagHF(std::vector<std::string>& args, const size_t pos)
+// Dont even remember why i was trying to create this function
+/* void Main::flagHF(std::vector<std::string>& args, const size_t pos)
 {
     std::cout << "Flag f:" << std::endl;
     std::cout << "You can create a file 'build.cpk' and write some code in following syntax." << std::endl;
     std::cout << "EXAMPLE: " << std::endl;
-}
+} */

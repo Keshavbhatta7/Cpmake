@@ -1,3 +1,5 @@
 1. Make so that we can use also use ' in build.cpk with ". [DONE]
 2. Make function lik "flagHF()" for getting info about a certain flag like file.
 3. Make sure flagHF() function gives info about the syntax in build.cpk file.
+
+--- Ain't doing nothing no more..
